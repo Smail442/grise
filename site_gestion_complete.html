@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte Grise- Gestion des Demandes</title>
+    <img src="C:\Users\me\Downloads\LOGO.png" alt="Logo" style="display:none;">
+    <script src="https://cdn.emailjs.com/sdk/2.11.0/email.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0d47a1;
+            --primary-light: #937aeb;
+            --accent: #ffc107;
+            --success: #43a047;
+            --danger: #e53935;
+            --warning: #f57c00;
+            --text-dark: #1a1a1a;
+            --text-light: #666;
+            --bg: #f5f7fa;
+            --border: #e0e0e0;
+            --white: #ffffff;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+        }
+
+        /* ========== HEADER ========== */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--white);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--white);
+        }
+
+        .logo:hover {
+            opacity: 0.9;
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+            color: var(--white);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link.active {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-name {
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c62828;
+            transform: translateY(-2px);
+        }
+
+        /* ========== MAIN ========== */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 30px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* ========== CONTAINERS ========== */
+        .container {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== LOGIN ========== */
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .login-container {
+            background: var(--white);
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(13, 71, 161, 0.1);
+        }
+
+        .login-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            padding: 12px;
+            border: 2px solid var(--border);
+            background: var(--white);
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 71, 161, 0.3);
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .test-buttons {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid var(--border);
+            text-align: center;
+        }
+
+        .test-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .test-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .test-client-btn {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .test-admin-btn {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ========== WELCOME PAGE ========== */
+        .welcome-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 50px;
+        }
+
+        .welcome-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .welcome-card {
+            background: var(--white);
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
+        }
+
+        .welcome-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+
+        .welcome-card h3 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .welcome-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* ========== SECTIONS ========== */
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 30px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* ========== FORMS ========== */
+        .form-card {
+            background: var(--white);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .checkbox-card {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 15px;
+        }
+
+        .checkbox-card:hover {
+            background: #eff3f8;
+            transform: translateX(5px);
+        }
+
+        .checkbox-card input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+            margin-top: 3px;
+        }
+
+        .checkbox-content h4 {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .checkbox-content p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* ========== REQUESTS TABLE ========== */
+        .requests-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .request-card {
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 15px;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .request-card:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .request-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .request-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .request-subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-verified {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .request-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label {
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: var(--primary);
+        }
+
+        .admin-note {
+            background: #fff8e1;
+            border-left: 4px solid var(--accent);
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .admin-note-label {
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .admin-note-text {
+            color: var(--text-dark);
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #0a3570;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background: #388e3c;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background: #c62828;
+        }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* ========== MODALS ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-dark);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 15px;
+            }
+
+            .nav-center {
+                display: none;
+            }
+
+            main {
+                padding: 20px 15px;
+            }
+
+            .welcome-title {
+                font-size: 1.8rem;
+            }
+
+            .login-container {
+                padding: 30px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .request-header {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========== ALERT ========== */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="login" class="login-page container active">
+        <div class="login-container">
+            <h1 class="login-title">🚗 Carte Grise</h1>
+            <p class="login-subtitle">Gestion des Demandes de Carte Grise</p>
+
+            <div class="alert" id="loginAlert"></div>
+
+            <div class="login-tabs">
+                <button class="tab-btn active" onclick="switchTab('client')">Client</button>
+                <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
+            </div>
+
+            <!-- CLIENT LOGIN -->
+            <form id="clientLoginForm" class="login-form active" onsubmit="handleClientLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="clientEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="clientPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">Se Connecter</button>
+            </form>
+
+            <!-- CLIENT REGISTER -->
+            <form id="clientRegisterForm" class="login-form" onsubmit="handleClientRegister(event)">
+                <div class="form-group">
+                    <label>Nom Complet</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Téléphone</label>
+                    <input type="tel" id="regPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">S'inscrire</button>
+            </form>
+
+            <!-- ADMIN LOGIN -->
+            <form id="adminLoginForm" class="login-form" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label>Email Admin</label>
+                    <input type="email" id="adminEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="adminPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">Connexion Admin</button>
+            </form>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" style="background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleRegister()">
+                    Pas de compte ? S'inscrire
+                </button>
+            </div>
+
+            <div class="test-buttons">
+                <span class="test-label">🧪 Mode Test - Charger des identifiants</span>
+                <button type="button" class="test-btn test-client-btn" onclick="loadTestClient()">Test Client</button>
+                <button type="button" class="test-btn test-admin-btn" onclick="loadTestAdmin()">Test Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER (après login) -->
+    <header id="mainHeader" style="display: none;">
+        <nav>
+            <a href="#" class="logo" onclick="goToWelcome()">
+                🚗 CarteGrise Pro
+            </a>
+            <div class="nav-center">
+                <button class="nav-link active" onclick="showPage('welcome')">Accueil</button>
+                <button class="nav-link" onclick="showPage('client')" id="clientNavBtn" style="display: none;">Espace Client</button>
+                <button class="nav-link" onclick="showPage('admin')" id="adminNavBtn" style="display: none;">Admin</button>
+            </div>
+            <div class="nav-right">
+                <span class="user-name" id="userName">Utilisateur</span>
+                <button class="logout-btn" onclick="logout()">Déconnexion</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main id="mainContent" style="display: none;">
+        <!-- WELCOME PAGE -->
+        <div id="welcome" class="container active">
+            <div class="welcome-container">
+                <h1 class="welcome-title">Bienvenue! 👋</h1>
+                <p class="welcome-subtitle" id="welcomeText">Que désirez-vous faire aujourd'hui ?</p>
+                
+                <div class="welcome-grid">
+                    <div class="welcome-card" onclick="showPage('client')">
+                        <div class="welcome-icon">📝</div>
+                        <h3>Faire une Demande</h3>
+                        <p>Créer une nouvelle demande de carte grise</p>
+                    </div>
+                    <div class="welcome-card" onclick="showPage('client')">
+                        <div class="welcome-icon">📁</div>
+                        <h3>Transmettre Documents</h3>
+                        <p>Envoyer les documents nécessaires</p>
+                    </div>
+                    <div class="welcome-card" onclick="showPage('client')">
+                        <div class="welcome-icon">📋</div>
+                        <h3>Suivre Demandes</h3>
+                        <p>Consulter l'état de vos demandes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLIENT PAGE -->
+        <div id="client" class="container">
+            <!-- FORMULAIRE -->
+            <div class="form-card">
+                <h2 class="section-title">Créer une Demande</h2>
+                <form id="requestForm" onsubmit="submitRequest(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>🚗 Immatriculation</label>
+                            <input type="text" id="immatriculation" placeholder="Ex: AB-123-CD" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Marque & Modèle</label>
+                            <input type="text" id="marque" placeholder="Ex: Peugeot 3008" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="color: var(--primary); font-weight: 600; display: block; margin-bottom: 15px;">
+                            📋 Quel service voulez-vous ?
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="services" value="Changement d'adresse">
+                                <div class="checkbox-content">
+                                    <h4>🏠 Changement d'Adresse</h4>
+                                    <p>Vous avez déménagé</p>
+                                </div>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="services" value="Changement de propriétaire">
+                                <div class="checkbox-content">
+                                    <h4>👤 Changement de Propriétaire</h4>
+                                    <p>Vous avez vendu ou acheté</p>
+                                </div>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="services" value="Déclaration de cession">
+                                <div class="checkbox-content">
+                                    <h4>📄 Déclaration de Cession</h4>
+                                    <p>Vous vendez votre véhicule</p>
+                                </div>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="services" value="Duplicata">
+                                <div class="checkbox-content">
+                                    <h4>🔄 Duplicata</h4>
+                                    <p>Carte grise perdue ou endommagée</p>
+                                </div>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="services" value="Déclaration d'achat">
+                                <div class="checkbox-content">
+                                    <h4>🛒 Déclaration d'Achat</h4>
+                                    <p>Vous venez d'acheter</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>💬 Notes (optionnel)</label>
+                        <textarea id="notes" placeholder="Décrivez votre situation..." style="min-height: 80px; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">✅ Créer la Demande</button>
+                </form>
+            </div>
+
+            <!-- DEMANDES -->
+            <div>
+                <h2 class="section-title">Mes Demandes</h2>
+                <div id="clientRequests"></div>
+            </div>
+        </div>
+
+        <!-- ADMIN PAGE -->
+        <div id="admin" class="container">
+            <h2 class="section-title">Tableau de Bord Admin</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                <div style="background: var(--white); padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary);" id="totalRequests">0</div>
+                    <div style="color: var(--text-light); font-weight: 600; margin-top: 8px;">Total</div>
+                </div>
+                <div style="background: var(--white); padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--warning);" id="pendingRequests">0</div>
+                    <div style="color: var(--text-light); font-weight: 600; margin-top: 8px;">En attente</div>
+                </div>
+                <div style="background: var(--white); padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary);" id="processingRequests">0</div>
+                    <div style="color: var(--text-light); font-weight: 600; margin-top: 8px;">En traitement</div>
+                </div>
+                <div style="background: var(--white); padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--success);" id="completedRequests">0</div>
+                    <div style="color: var(--text-light); font-weight: 600; margin-top: 8px;">Complétées</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Toutes les Demandes</h2>
+            <div id="adminRequests"></div>
+        </div>
+    </main>
+
+    <!-- MODAL UPDATE STATUS -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Mettre à Jour le Statut</h2>
+                <button class="close-btn" onclick="closeModal('updateModal')">&times;</button>
+            </div>
+            <form id="updateForm" onsubmit="submitUpdate(event)">
+                <div class="form-group">
+                    <label>Nouveau Statut</label>
+                    <select id="newStatus" required>
+                        <option value="">Sélectionner...</option>
+                        <option value="En attente">En attente</option>
+                        <option value="Documents vérifiés">Documents vérifiés</option>
+                        <option value="En traitement">En traitement</option>
+                        <option value="Finalisation">Finalisation</option>
+                        <option value="Complétée">Complétée</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes (optionnel)</label>
+                    <textarea id="adminNotes" style="min-height: 80px; resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Mettre à Jour</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        let emailjs_available = false;
+        if (typeof emailjs !== 'undefined') {
+            try {
+                emailjs.init('YOUR_PUBLIC_KEY');
+                emailjs_available = true;
+            } catch (e) {}
+        }
+
+        // Database
+        const db = {
+            clients: JSON.parse(localStorage.getItem('clients')) || [],
+            requests: JSON.parse(localStorage.getItem('requests')) || [],
+            currentUser: null,
+            isAdmin: false
+        };
+
+        const ADMIN_CREDENTIALS = {
+            email: 'admin@cartegrise.fr',
+            password: 'admin123'
+        };
+
+        // ========== LOGIN FUNCTIONS ==========
+        function switchTab(type) {
+            document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (type === 'client') {
+                document.getElementById('clientLoginForm').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } else {
+                document.getElementById('adminLoginForm').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+        }
+
+        function toggleRegister() {
+            document.getElementById('clientLoginForm').classList.toggle('active');
+            document.getElementById('clientRegisterForm').classList.toggle('active');
+        }
+
+        function handleClientLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('clientEmail').value;
+            const password = document.getElementById('clientPassword').value;
+
+            const client = db.clients.find(c => c.email === email && c.password === password);
+            if (client) {
+                db.currentUser = client;
+                db.isAdmin = false;
+                loginSuccess();
+                createTestRequests();
+            } else {
+                showAlert('Identifiants invalides', 'danger');
+            }
+        }
+
+        function handleClientRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const phone = document.getElementById('regPhone').value;
+            const password = document.getElementById('regPassword').value;
+
+            if (db.clients.find(c => c.email === email)) {
+                showAlert('Cet email existe déjà', 'danger');
+                return;
+            }
+
+            const newClient = {
+                id: Date.now(),
+                name,
+                email,
+                phone,
+                password,
+                registrationDate: new Date().toLocaleDateString('fr-FR')
+            };
+
+            db.clients.push(newClient);
+            localStorage.setItem('clients', JSON.stringify(db.clients));
+            showAlert('Inscription réussie ! Connectez-vous', 'success');
+            toggleRegister();
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+                db.currentUser = { name: 'Administrateur', email: email };
+                db.isAdmin = true;
+                loginSuccess();
+            } else {
+                showAlert('Identifiants admin invalides', 'danger');
+            }
+        }
+
+        function loginSuccess() {
+            document.getElementById('login').classList.remove('active');
+            document.getElementById('mainHeader').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('userName').textContent = db.currentUser.name;
+
+            if (db.isAdmin) {
+                document.getElementById('adminNavBtn').style.display = 'block';
+                document.getElementById('clientNavBtn').style.display = 'none';
+                loadAdminData();
+            } else {
+                document.getElementById('clientNavBtn').style.display = 'block';
+                document.getElementById('adminNavBtn').style.display = 'none';
+                loadClientData();
+            }
+
+            showPage('welcome');
+        }
+
+        function logout() {
+            db.currentUser = null;
+            db.isAdmin = false;
+            document.getElementById('login').classList.add('active');
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('clientLoginForm').classList.add('active');
+            document.getElementById('clientRegisterForm').classList.remove('active');
+            document.getElementById('clientEmail').value = '';
+            document.getElementById('clientPassword').value = '';
+        }
+
+        function loadTestClient() {
+            document.getElementById('clientEmail').value = 'test@gmail.com';
+            document.getElementById('clientPassword').value = 'test123';
+            switchTab('client');
+
+            const testClient = {
+                id: 1001,
+                name: 'Jean Dupont',
+                email: 'test@gmail.com',
+                phone: '06 12 34 56 78',
+                password: 'test123',
+                registrationDate: new Date().toLocaleDateString('fr-FR')
+            };
+
+            if (!db.clients.find(c => c.email === 'test@gmail.com')) {
+                db.clients.push(testClient);
+                localStorage.setItem('clients', JSON.stringify(db.clients));
+            }
+
+            showAlert('✅ Identifiants de test chargés !', 'success');
+        }
+
+        function loadTestAdmin() {
+            document.getElementById('adminEmail').value = 'admin@cartegrise.fr';
+            document.getElementById('adminPassword').value = 'admin123';
+            switchTab('admin');
+            showAlert('✅ Identifiants admin chargés !', 'success');
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('loginAlert');
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => alert.classList.remove('show'), 4000);
+        }
+
+        // ========== PAGE NAVIGATION ==========
+        function showPage(page) {
+            document.querySelectorAll('main > .container').forEach(c => c.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            event?.target?.classList.add('active');
+        }
+
+        function goToWelcome() {
+            showPage('welcome');
+        }
+
+        // ========== CLIENT FUNCTIONS ==========
+        function submitRequest(e) {
+            e.preventDefault();
+
+            const services = Array.from(document.querySelectorAll('input[name="services"]:checked')).map(c => c.value);
+            if (services.length === 0) {
+                alert('Veuillez sélectionner au least un service');
+                return;
+            }
+
+            const newRequest = {
+                id: Date.now(),
+                clientId: db.currentUser.id,
+                clientName: db.currentUser.name,
+                clientEmail: db.currentUser.email,
+                clientPhone: db.currentUser.phone,
+                immatriculation: document.getElementById('immatriculation').value,
+                marque: document.getElementById('marque').value,
+                services: services,
+                notes: document.getElementById('notes').value,
+                status: 'En attente',
+                adminNotes: '',
+                createdDate: new Date().toLocaleDateString('fr-FR'),
+                createdTime: new Date().toLocaleTimeString('fr-FR')
+            };
+
+            db.requests.push(newRequest);
+            localStorage.setItem('requests', JSON.stringify(db.requests));
+
+            document.getElementById('requestForm').reset();
+            loadClientData();
+            alert('✅ Demande créée avec succès !');
+        }
+
+        function loadClientData() {
+            const clientRequests = db.requests.filter(r => r.clientId === db.currentUser.id);
+            const container = document.getElementById('clientRequests');
+
+            if (clientRequests.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p class="empty-text">Aucune demande créée</p></div>';
+                return;
+            }
+
+            let html = '';
+            clientRequests.forEach(req => {
+                const statusClass = `status-${req.status.toLowerCase().replace(/\s+/g, '-')}`;
+                html += `
+                    <div class="request-card">
+                        <div class="request-header">
+                            <div>
+                                <div class="request-title">🚗 ${req.immatriculation}</div>
+                                <div class="request-subtitle">${req.marque}</div>
+                            </div>
+                            <div class="status-badge ${statusClass}">${req.status}</div>
+                        </div>
+                        <div class="request-info">
+                            <div class="info-item">
+                                <span class="info-label">📅 Créée le:</span>
+                                <span class="info-value">${req.createdDate}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">📋 Services:</span>
+                                <span class="info-value">${req.services.length}</span>
+                            </div>
+                        </div>
+                        ${req.adminNotes ? `<div class="admin-note"><div class="admin-note-label">📝 Note admin:</div><div class="admin-note-text">${req.adminNotes}</div></div>` : ''}
+                        <div class="request-actions">
+                            <button class="action-btn btn-primary" onclick="deleteRequest(${req.id})">Supprimer</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function deleteRequest(id) {
+            if (confirm('Êtes-vous sûr ?')) {
+                db.requests = db.requests.filter(r => r.id !== id);
+                localStorage.setItem('requests', JSON.stringify(db.requests));
+                loadClientData();
+            }
+        }
+
+        // ========== ADMIN FUNCTIONS ==========
+        function loadAdminData() {
+            // Stats
+            const total = db.requests.length;
+            const pending = db.requests.filter(r => r.status === 'En attente').length;
+            const processing = db.requests.filter(r => r.status === 'En traitement').length;
+            const completed = db.requests.filter(r => r.status === 'Complétée').length;
+
+            document.getElementById('totalRequests').textContent = total;
+            document.getElementById('pendingRequests').textContent = pending;
+            document.getElementById('processingRequests').textContent = processing;
+            document.getElementById('completedRequests').textContent = completed;
+
+            // Requests
+            const container = document.getElementById('adminRequests');
+            if (db.requests.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p class="empty-text">Aucune demande</p></div>';
+                return;
+            }
+
+            let html = '';
+            db.requests.forEach(req => {
+                const statusClass = `status-${req.status.toLowerCase().replace(/\s+/g, '-')}`;
+                html += `
+                    <div class="request-card">
+                        <div class="request-header">
+                            <div>
+                                <div class="request-title">🚗 ${req.immatriculation}</div>
+                                <div class="request-subtitle">${req.clientName} - ${req.marque}</div>
+                            </div>
+                            <div class="status-badge ${statusClass}">${req.status}</div>
+                        </div>
+                        <div class="request-info">
+                            <div class="info-item">
+                                <span class="info-label">📧 Email:</span>
+                                <span class="info-value">${req.clientEmail}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">📱 Téléphone:</span>
+                                <span class="info-value">${req.clientPhone}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">📋 Services:</span>
+                                <span class="info-value">${req.services.join(', ')}</span>
+                            </div>
+                        </div>
+                        ${req.adminNotes ? `<div class="admin-note"><div class="admin-note-label">📝 Notes:</div><div class="admin-note-text">${req.adminNotes}</div></div>` : ''}
+                        <div class="request-actions">
+                            <button class="action-btn btn-success" onclick="openUpdate(${req.id})">Éditer</button>
+                            <button class="action-btn btn-danger" onclick="deleteAdminRequest(${req.id})">Supprimer</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function openUpdate(id) {
+            const req = db.requests.find(r => r.id === id);
+            if (req) {
+                window.currentUpdateId = id;
+                document.getElementById('newStatus').value = req.status;
+                document.getElementById('adminNotes').value = req.adminNotes || '';
+                document.getElementById('updateModal').classList.add('show');
+            }
+        }
+
+        function submitUpdate(e) {
+            e.preventDefault();
+            const req = db.requests.find(r => r.id === window.currentUpdateId);
+            if (req) {
+                req.status = document.getElementById('newStatus').value;
+                req.adminNotes = document.getElementById('adminNotes').value;
+                req.updatedDate = new Date().toLocaleDateString('fr-FR');
+
+                localStorage.setItem('requests', JSON.stringify(db.requests));
+                closeModal('updateModal');
+                loadAdminData();
+                alert('✅ Mise à jour réussie !');
+            }
+        }
+
+        function deleteAdminRequest(id) {
+            if (confirm('Êtes-vous sûr ?')) {
+                db.requests = db.requests.filter(r => r.id !== id);
+                localStorage.setItem('requests', JSON.stringify(db.requests));
+                loadAdminData();
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+            }
+        };
+
+        // ========== TEST DATA ==========
+        function createTestRequests() {
+            const existing = db.requests.find(r => r.clientId === db.currentUser.id && r.immatriculation === 'AB-123-CD');
+            if (existing) return;
+
+            const testRequests = [
+                {
+                    id: Date.now(),
+                    clientId: db.currentUser.id,
+                    clientName: db.currentUser.name,
+                    clientEmail: db.currentUser.email,
+                    clientPhone: db.currentUser.phone,
+                    immatriculation: 'AB-123-CD',
+                    marque: 'Peugeot 3008',
+                    services: ['Changement d\'adresse'],
+                    notes: 'Déménagement',
+                    status: 'En attente',
+                    adminNotes: '',
+                    createdDate: new Date().toLocaleDateString('fr-FR'),
+                    createdTime: new Date().toLocaleTimeString('fr-FR')
+                }
+            ];
+
+            db.requests.push(...testRequests);
+            localStorage.setItem('requests', JSON.stringify(db.requests));
+        }
+    </script>
+</body>
+</html>
